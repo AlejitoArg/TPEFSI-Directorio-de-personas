@@ -1,16 +1,17 @@
-import Personas from '../Personas';
 import React, {useState, useEffect} from "react";
 import { useNavigate } from "react-router-dom";
+import { ActionTypes, useContextState } from "../contextState";
 import axios, * as others from 'axios';
 
 
 export default function Home() {
   const [query, setQuery] = useState([])
   const [productsAlreadyRequested, setProductsAlreadyRequested] = useState([])
+  const { contextState, setContextState } = useContextState();
   let productsAmmount=6;
   let navigate = useNavigate();
 
-  const pedirDatosProducto = (idProduct)=>{
+  /*const pedirDatosProducto = (idProduct)=>{
     let ghostList=query
     axios.get(`https://dummyjson.com/products/${idProduct}`)
     .then(function (response) {
@@ -33,6 +34,7 @@ export default function Home() {
   }
 
   useEffect(()=>{
+    console.log("")
     for(let i=0;i<productsAmmount/2;i++){
       let rand;
       do{
@@ -41,7 +43,30 @@ export default function Home() {
       setProductsAlreadyRequested([...productsAlreadyRequested, rand])
       pedirDatosProducto(rand)
     }
+  },[])*/
+
+  const getFirstTwelve = () =>{
+    axios.get(`https://dummyjson.com/products`)
+    .then(function (response) {
+      console.log(response.data.products)
+      setQuery(response.data.products.filter(product => product.id<13));
+      console.log(response.data.products)
+    })
+    .catch(function (error) {
+        console.log(error)
+    })
+  }
+  useEffect(()=>{
+    getFirstTwelve()
   },[])
+
+  const verDetalle = (producto) =>{
+    setContextState({
+      type: ActionTypes.SetProductoSeleccionado,
+      value: producto
+    })
+    navigate(`/detalle/`)
+  }
 
   return (
     <>
@@ -64,10 +89,12 @@ export default function Home() {
         </div>
       </div>*/}
       {query.map( 
-        (i)=>(
+        (Product)=>(
           <>
-            <p>{i.title}</p>
-            <img src={i.images[0]}/>
+            <div key={Product.id} onClick={verDetalle(Product.id)}>
+            <p>{Product.title}</p>
+            <img src={Product.images[0]}/>
+            </div>
           </>
         )
       )}
